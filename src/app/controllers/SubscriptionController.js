@@ -2,6 +2,9 @@ import User from '../models/User';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 
+import SubscriptionMail from '../jobs/SubscriptionMail';
+import Queue from '../../lib/Queue';
+
 class SubscriptionController {
   async store(req, res) {
     const user = await User.findByPk(req.userId);
@@ -60,6 +63,10 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: req.userId,
       meetup_id: req.params.meetupId,
+    });
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
     });
 
     return res.json(subscription);
