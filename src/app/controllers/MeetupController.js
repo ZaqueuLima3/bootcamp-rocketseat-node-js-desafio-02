@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { parseISO, isBefore, isAfter, subDays, addDays } from 'date-fns';
+import { parseISO, isBefore, subDays } from 'date-fns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import File from '../models/File';
@@ -107,8 +107,7 @@ class MeetupController {
       return res.status(401).json({ error: 'Invalid meetup' });
     }
 
-    const now = new Date();
-    if (!isBefore(now, meetup.date)) {
+    if (meetup.past) {
       return res.status(401).json({ error: 'This meetup has ben passed' });
     }
 
@@ -124,8 +123,7 @@ class MeetupController {
       where: { id: meetupId, user_id: req.userId },
     });
 
-    const now = new Date();
-    if (!isBefore(now, meetup.date)) {
+    if (meetup.past) {
       return res.status(401).json({ error: 'This meetup has ben passed' });
     }
 
