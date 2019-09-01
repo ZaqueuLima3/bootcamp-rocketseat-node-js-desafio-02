@@ -6,13 +6,9 @@ import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
-    const { page } = req.query;
-
     const meetups = await Meetup.findAll({
       where: { user_id: req.userId },
       order: ['date'],
-      limit: 20,
-      offset: (page - 1) * 20,
       attributes: ['id', 'title', 'description', 'location', 'date', 'past'],
       include: [
         {
@@ -34,6 +30,35 @@ class MeetupController {
     });
 
     return res.json(meetups);
+  }
+
+  async show(req, res) {
+    const meetup = await Meetup.findOne({
+      where: {
+        id: req.params.meetupId,
+        user_id: req.userId,
+      },
+      attributes: ['id', 'title', 'description', 'location', 'date', 'past'],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name'],
+          include: {
+            model: File,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
+          },
+        },
+        {
+          model: File,
+          as: 'image',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
+
+    return res.json(meetup);
   }
 
   async store(req, res) {

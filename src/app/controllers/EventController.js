@@ -2,6 +2,7 @@ import { parseISO, startOfDay, endOfDay } from 'date-fns';
 import { Op } from 'sequelize';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class EventController {
   async index(req, res) {
@@ -23,6 +24,11 @@ class EventController {
           model: User,
           as: 'user',
           attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: File,
+          as: 'image',
+          attributes: ['id', 'path', 'url'],
         },
       ],
     });

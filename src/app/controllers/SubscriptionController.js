@@ -1,5 +1,6 @@
 import User from '../models/User';
 import Meetup from '../models/Meetup';
+import File from '../models/File';
 import Subscription from '../models/Subscription';
 
 import SubscriptionMail from '../jobs/SubscriptionMail';
@@ -12,6 +13,7 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
+          as: 'meetup',
           attributes: [
             'id',
             'title',
@@ -19,6 +21,25 @@ class SubscriptionController {
             'location',
             'date',
             'past',
+            'image_id',
+            'user_id',
+          ],
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'name'],
+              include: {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
+              },
+            },
+            {
+              model: File,
+              as: 'image',
+              attributes: ['id', 'path', 'url'],
+            },
           ],
           order: [[Meetup, 'date']],
         },
@@ -68,6 +89,7 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
+          as: 'meetup',
           required: true,
           where: {
             date: meetup.date,
@@ -92,6 +114,18 @@ class SubscriptionController {
     });
 
     return res.json(subscription);
+  }
+
+  async delete(req, res) {
+    const { meetupId } = req.params;
+
+    const subscription = await Subscription.findOne({
+      where: { meetup_id: meetupId, user_id: req.userId },
+    });
+
+    subscription.destroy();
+
+    return res.json();
   }
 }
 
